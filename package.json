@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "heroku local:start",
+    "start": "node ./bin/www",
     "super": "supervisor ./bin/www",
     "start_old": "node ./bin/www"
   },
@@ -17,7 +17,7 @@
     "cookie-parser": "~1.4.3",
     "debug": "~2.6.9",
     "ejs": "~2.5.7",
-    "express": "~4.15.5",
+    "express": "^4.15.5",
     "express-flash": "0.0.2",
     "express-partials": "^0.3.0",
     "express-session": "^1.15.6",

@@ -153,3 +153,75 @@ exports.check = (req, res, next) => {
         answer
     });
 };
+
+
+//Practica 6: añadimos promesas para el play
+//randomPlay
+exports.randomplay = (req, res, next) => {
+    req.session.alreadyPlayed = req.session.alreadyPlayed || [];
+    
+    const score = req.session.alreadyPlayed.length;
+
+    const whereOpt = {id: {[Sequelize.Op.notIn] : req.session.alreadyPlayed}} ;
+
+    models.quiz.count({where:whereOpt})
+
+   .then(count => {
+       return models.quiz.findAll({
+            where: whereOpt,
+            offset: Math.floor(Math.random()*count),
+            limit:1
+         })
+
+       .then(quizzes => {
+            return quizzes[0];
+        })
+   })
+
+    .then(quiz => {
+        if(quiz === undefined) {
+            req.session.alreadyPlayed = [];
+            res.render('quizzes/random_nomore', {
+                score: score
+            });
+        } else {
+            res.render('quizzes/random_play', {
+                quiz: quiz,
+                score: score
+            });
+        }
+    })
+
+    .catch(error => next(error));
+
+};
+
+//randomcheck
+
+exports.randomcheck = (req, res, next) => {
+    try{
+    const {quiz, query} = req;
+    req.session.alreadyPlayed = req.session.alreadyPlayed || [];
+
+    const actual_answer = query.answer || "";
+    const right_answer = quiz.answer;
+
+    const result = actual_answer.toLowerCase().trim() === right_answer.toLowerCase().trim();
+
+    if (result){
+        if(req.session.alreadyPlayed.indexOf(req.quiz.id) === -1){ 
+            req.session.alreadyPlayed.push(req.quiz.id);
+        }
+    } 
+
+    const score = req.session.alreadyPlayed.length;
+
+    if(!result){
+        req.session.alreadyPlayed = [];
+    }
+
+    res.render('quizzes/random_result', {actual_answer, result, score});
+    } catch (error){
+        next(error);
+    }
+}
